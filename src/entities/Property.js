@@ -13,7 +13,9 @@ class Property extends BaseEntity {
     this.status = data.status || 'active';
     this.image_url = data.image_url;
     this.facilities = data.facilities; // JSONB
-    this.developer_info = data.developer_info; // JSONB
+    this.is_live_grouping = data.is_live_grouping || false;
+    this.is_bada_builder = data.is_bada_builder || false;
+    this.live_group_config = data.live_group_config || {};
   }
 
   static get tableName() {
@@ -23,7 +25,9 @@ class Property extends BaseEntity {
   static get columns() {
     return [
       'id', 'user_id', 'title', 'type', 'location', 'price', 'description',
-      'status', 'image_url', 'facilities', 'developer_info', 'created_at', 'updated_at'
+      'status', 'image_url', 'facilities', 'developer_info', 
+      'is_live_grouping', 'is_bada_builder', 'live_group_config',
+      'created_at', 'updated_at'
     ];
   }
 }
