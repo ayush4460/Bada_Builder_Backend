@@ -19,7 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Routes
-app.use(routes);
+console.log('Mounting routes under /api');
+app.use('/api', routes);
 
 // Error Handling Middleware
 app.use(errorHandler);

@@ -1,10 +1,15 @@
-const morgan = require('morgan');
 const logger = require('../utils/logger');
 
-const stream = {
-  write: (message) => logger.info(message.trim())
+const requestLogger = (req, res, next) => {
+  const start = Date.now();
+  console.log(`[INCOMING] ${req.method} ${req.url}`);
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`[OUTGOING] ${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
+  });
+  
+  next();
 };
-
-const requestLogger = morgan('combined', { stream });
 
 module.exports = requestLogger;

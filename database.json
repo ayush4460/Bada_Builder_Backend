@@ -1,0 +1,13 @@
+{
+  "dev": {
+    "driver": "pg",
+    "user": "neondb_owner",
+    "password": { "ENV": "DB_PASSWORD" }, 
+    "host": "ep-plain-frost-a4uljv4j-pooler.us-east-1.aws.neon.tech",
+    "database": "neondb",
+    "port": 5432,
+    "schema": "public",
+    "ssl": { "rejectUnauthorized": false }
+  },
+  "sql-file": true
+}
