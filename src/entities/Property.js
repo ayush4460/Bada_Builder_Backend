@@ -13,6 +13,7 @@ class Property extends BaseEntity {
     this.status = data.status || 'active';
     this.image_url = data.image_url;
     this.facilities = data.facilities; // JSONB
+    this.developer_info = data.developer_info; // JSONB
     this.is_live_grouping = data.is_live_grouping || false;
     this.is_bada_builder = data.is_bada_builder || false;
     this.live_group_config = data.live_group_config || {};
