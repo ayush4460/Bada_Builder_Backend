@@ -60,7 +60,7 @@ class AuthService {
   }
 
   generateToken(user) {
-    return jwt.sign({ uid: user.uid }, JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign({ uid: user.uid, email: user.email, user_type: user.user_type }, JWT_SECRET, { expiresIn: '7d' });
   }
 
   async getMe(uid) {
