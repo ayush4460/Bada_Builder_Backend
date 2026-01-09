@@ -41,6 +41,12 @@ class PropertyModel {
       whereClauses.push(`status = $${params.length}`);
     }
 
+    if (filters.role === 'individual') {
+      whereClauses.push(`developer_info IS NULL`);
+    } else if (filters.role === 'developer') {
+      whereClauses.push(`developer_info IS NOT NULL`);
+    }
+
     if (whereClauses.length > 0) {
       query += ' WHERE ' + whereClauses.join(' AND ');
     }

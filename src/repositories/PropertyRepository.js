@@ -18,13 +18,40 @@ class PropertyRepository extends BaseRepository {
     `;
     
     if (keys.length > 0) {
-      const whereClause = keys.map((key, i) => `p.${key} = $${i + 1}`).join(' AND ');
-      query += ` WHERE ${whereClause}`;
+      const whereClauses = [];
+      let paramIndex = 1;
+
+      // Handle specific filters manually
+      if (filters.role) {
+        if (filters.role === 'individual') {
+          whereClauses.push(`p.developer_info IS NULL`);
+        } else if (filters.role === 'developer') {
+          whereClauses.push(`p.developer_info IS NOT NULL`);
+        }
+        // Remove role from generic processing
+        delete filters.role; 
+      }
+
+      // Handle remaining generic filters
+      Object.keys(filters).forEach((key) => {
+         // Prevent SQL injection by ensuring key is safe? 
+         // Assuming internal usage or safe keys for now.
+         whereClauses.push(`p.${key} = $${paramIndex}`);
+         paramIndex++;
+      });
+      
+      if (whereClauses.length > 0) {
+          query += ` WHERE ${whereClauses.join(' AND ')}`;
+      }
     }
     
-    query += ` ORDER BY p.created_at DESC LIMIT $${keys.length + 1} OFFSET $${keys.length + 2}`;
+    // Re-map params because we might have skipped 'role'
+    // Actually, we need to rebuild params array to match the order of generic filters
+    const finalParams = Object.values(filters); // 'role' was deleted from filters object
     
-    const result = await this.pool.query(query, [...params, limit, offset]);
+    query += ` ORDER BY p.created_at DESC LIMIT $${finalParams.length + 1} OFFSET $${finalParams.length + 2}`;
+    
+    const result = await this.pool.query(query, [...finalParams, limit, offset]);
     
     // We can map to entity, but entity might not have user_type field defined. 
     // Ideally we extend the returned object.

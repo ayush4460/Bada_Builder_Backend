@@ -9,7 +9,8 @@ const appDb = require('../data/AppDbContext'); // Still need context for AuditLo
 
 exports.createProperty = async (req, res, next) => {
   try {
-    const newProperty = await propertyService.createProperty(req.body, req.user.uid);
+    // Pass role (individual/developer) to service to enforce data structure
+    const newProperty = await propertyService.createProperty({ ...req.body, role: req.body.role }, req.user.uid);
     
     // Audit Log could be in Service, but keeping it explicit here is also fine for now.
     // Ideally, the Service should handle side-effects like Auditing.
@@ -40,10 +41,11 @@ exports.createProperty = async (req, res, next) => {
 
 exports.getProperties = async (req, res, next) => {
   try {
-    const { user_id, type } = req.query;
+    const { user_id, type, role } = req.query;
     const filters = {};
     if (user_id) filters.user_id = user_id;
     if (type) filters.type = type;
+    if (role) filters.role = role;
     filters.status = 'active';
 
     const properties = await propertyService.getAllProperties(filters);
