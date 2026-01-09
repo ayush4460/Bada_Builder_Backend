@@ -124,6 +124,34 @@ class AuthService {
 
     return { message: 'Password updated successfully' };
   }
+
+  async initiateEmailChange(uid, newEmail) {
+    const existing = await this.context.users.findByEmail(newEmail);
+    if (existing) {
+      throw { status: 400, message: 'Email already in use' };
+    }
+    
+    // Send OTP to the NEW email
+    await this.otpService.generateAndSendOtp(newEmail);
+    return { message: 'OTP sent to new email' };
+  }
+
+  async verifyAndChangeEmail(uid, newEmail, otp) {
+    // Verify OTP for the NEW email
+    const verification = await this.otpService.verifyOtp(newEmail, otp);
+    if (!verification.valid) {
+      throw { status: 400, message: verification.message };
+    }
+
+    // Update User
+    const updatedUser = await this.context.users.update({ uid }, { email: newEmail });
+    delete updatedUser.password_hash;
+    
+    // Clear OTP
+    await this.otpService.clearOtp(newEmail);
+
+    return { message: 'Email updated successfully', user: updatedUser };
+  }
 }
 
 module.exports = new AuthService();

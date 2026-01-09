@@ -66,7 +66,7 @@ exports.getMe = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
   try {
-    const allowedUpdates = ['name', 'phone_number', 'profile_photo'];
+    const allowedUpdates = ['name', 'phone_number', 'profile_photo', 'location'];
     const updates = {};
     
     Object.keys(req.body).forEach(key => {
@@ -109,6 +109,36 @@ exports.resetPassword = async (req, res, next) => {
 
   try {
     const result = await authService.resetPassword({ uid: id, token, newPassword: password });
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+exports.initiateEmailChange = async (req, res, next) => {
+  const { newEmail } = req.body;
+  if (!newEmail) return res.status(400).json({ success: false, message: 'New email is required' });
+
+  try {
+    const result = await authService.initiateEmailChange(req.user.uid, newEmail);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+exports.verifyEmailChange = async (req, res, next) => {
+  const { newEmail, otp } = req.body;
+  if (!newEmail || !otp) return res.status(400).json({ success: false, message: 'New email and OTP are required' });
+
+  try {
+    const result = await authService.verifyAndChangeEmail(req.user.uid, newEmail, otp);
     res.status(200).json({ success: true, ...result });
   } catch (error) {
     if (error.status) {
