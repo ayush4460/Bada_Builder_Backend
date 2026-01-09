@@ -147,3 +147,33 @@ exports.verifyEmailChange = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.sendLoginOtp = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+  try {
+    const result = await authService.sendLoginOtp(email);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+exports.loginWithOtp = async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+
+  try {
+    const result = await authService.loginWithOtp(email, otp);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};

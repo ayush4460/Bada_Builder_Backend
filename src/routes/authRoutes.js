@@ -12,6 +12,8 @@ router.get('/me', auth, authController.getMe);
 router.put('/update', auth, authController.updateProfile);
 router.post('/initiate-email-change', auth, authController.initiateEmailChange);
 router.post('/verify-email-change', auth, authController.verifyEmailChange);
+router.post('/send-login-otp', authController.sendLoginOtp);
+router.post('/login-with-otp', authController.loginWithOtp);
 
 
 module.exports = router;

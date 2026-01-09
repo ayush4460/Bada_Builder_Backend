@@ -152,6 +152,35 @@ class AuthService {
 
     return { message: 'Email updated successfully', user: updatedUser };
   }
+
+  async sendLoginOtp(email) {
+    const user = await this.context.users.findByEmail(email);
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    await this.otpService.generateAndSendOtp(email);
+    return { message: 'OTP sent to email', email };
+  }
+
+  async loginWithOtp(email, otp) {
+    const verification = await this.otpService.verifyOtp(email, otp);
+    if (!verification.valid) {
+      throw { status: 400, message: verification.message };
+    }
+
+    const user = await this.context.users.findByEmail(email);
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    // Clear OTP after successful login
+    await this.otpService.clearOtp(email);
+
+    const token = this.generateToken(user);
+    delete user.password_hash;
+    return { token, user };
+  }
 }
 
 module.exports = new AuthService();
