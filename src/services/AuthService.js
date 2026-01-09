@@ -3,12 +3,15 @@ const jwt = require('jsonwebtoken');
 const appDbContext = require('../data/AppDbContext');
 const otpService = require('./OtpService');
 
+const emailService = require('./EmailService');
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_change_in_production';
 
 class AuthService {
   constructor() {
     this.context = appDbContext;
     this.otpService = otpService;
+    this.emailService = emailService;
   }
 
   async register({ email, password, name, user_type, phone_number, otp }) {
@@ -75,6 +78,51 @@ class AuthService {
     const updatedUser = await this.context.users.update({ uid }, updateData);
     delete updatedUser.password_hash;
     return updatedUser;
+  }
+
+  async forgotPassword(email) {
+    const user = await this.context.users.findByEmail(email);
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    const secret = JWT_SECRET + user.password_hash;
+    const payload = {
+      uid: user.uid,
+      purpose: 'reset_password'
+    };
+    const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const resetLink = `${clientUrl}/reset-password?token=${token}&id=${user.uid}`;
+
+    await this.emailService.sendPasswordResetEmail(email, resetLink, user.name);
+
+    return { message: 'Password reset link sent to email' };
+  }
+
+  async resetPassword({ uid, token, newPassword }) {
+    const user = await this.context.users.findByUid(uid);
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    const secret = JWT_SECRET + user.password_hash;
+    try {
+        const payload = jwt.verify(token, secret);
+        if (payload.uid !== uid || payload.purpose !== 'reset_password') {
+             throw { status: 400, message: 'Invalid token' };
+        }
+    } catch (err) {
+        throw { status: 400, message: 'Invalid or expired token' };
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await this.context.users.update({ uid }, { password_hash: hashedPassword });
+
+    return { message: 'Password updated successfully' };
   }
 }
 

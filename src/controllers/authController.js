@@ -82,3 +82,38 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
+
+exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+
+  try {
+    const result = await authService.forgotPassword(email);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const { token, id, password } = req.body;
+
+  if (!token || !id || !password) {
+    return res.status(400).json({ success: false, message: 'Token, User ID, and Password are required' });
+  }
+
+  try {
+    const result = await authService.resetPassword({ uid: id, token, newPassword: password });
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
