@@ -63,6 +63,19 @@ class AuthService {
   async getMe(uid) {
     return await this.context.users.findByUid(uid);
   }
+
+  async updateUser(uid, updateData) {
+    // Prevent updating critical fields directly if needed, e.g. uid, email (unless specific flow)
+    // For now, allow updating passed fields.
+    const user = await this.context.users.findByUid(uid);
+    if (!user) {
+      throw { status: 404, message: 'User not found' };
+    }
+
+    const updatedUser = await this.context.users.update({ uid }, updateData);
+    delete updatedUser.password_hash;
+    return updatedUser;
+  }
 }
 
 module.exports = new AuthService();

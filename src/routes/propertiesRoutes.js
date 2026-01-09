@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 
 router.post('/', auth, propertiesController.createProperty);
 router.get('/', propertiesController.getProperties);
+router.get('/user/me', auth, propertiesController.getMyProperties);
 router.get('/:id', propertiesController.getPropertyById);
 router.put('/:id', auth, propertiesController.updateProperty);
 

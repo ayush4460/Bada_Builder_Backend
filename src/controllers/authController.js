@@ -63,3 +63,22 @@ exports.getMe = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const allowedUpdates = ['name', 'phone_number', 'profile_photo'];
+    const updates = {};
+    
+    Object.keys(req.body).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        updates[key] = req.body[key];
+      }
+    });
+
+    const user = await authService.updateUser(req.user.uid, updates);
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+

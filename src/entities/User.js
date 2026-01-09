@@ -13,6 +13,7 @@ class User extends BaseEntity {
     this.password_hash = data.password_hash;
     this.phone_number = data.phone_number;
     this.is_verified = data.is_verified || false;
+    this.profile_photo = data.profile_photo;
   }
 
   static get tableName() {
@@ -23,7 +24,7 @@ class User extends BaseEntity {
     return [
       'uid', 'email', 'name', 'user_type', 'is_subscribed', 
       'subscription_expiry', 'property_credits', 'password_hash', 
-      'phone_number', 'is_verified', 'created_at', 'updated_at'
+      'phone_number', 'is_verified', 'profile_photo', 'created_at', 'updated_at'
     ];
   }
 }

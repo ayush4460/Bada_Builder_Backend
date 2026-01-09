@@ -7,6 +7,7 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/send-otp', authController.sendOtp);
 router.get('/me', auth, authController.getMe);
+router.put('/update', auth, authController.updateProfile);
 
 
 module.exports = router;
