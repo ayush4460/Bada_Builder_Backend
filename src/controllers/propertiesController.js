@@ -76,6 +76,7 @@ exports.updateProperty = async (req, res, next) => {
 
 exports.getMyProperties = async (req, res, next) => {
   try {
+    console.log('🔍 getMyProperties called for user:', req.user?.uid);
     const filters = { user_id: req.user.uid };
     // Optionally filters.status? The user wants 'their' properties, maybe inactive too?
     // Let's return all their properties for now.
@@ -85,8 +86,10 @@ exports.getMyProperties = async (req, res, next) => {
     // It filters by passing exact matches.
     
     const properties = await propertyService.getAllProperties(filters);
+    console.log(`✅ Found ${properties.length} properties for user ${req.user?.uid}`);
     res.status(200).json({ success: true, count: properties.length, properties });
   } catch (error) {
+    console.error('❌ Error in getMyProperties:', error);
     next(error);
   }
 };
